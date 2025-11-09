@@ -4,7 +4,7 @@ import re
 
 def read_input() -> str:
     with open("input", "r") as file:
-        return "".join(file.readlines())
+        return file.read()
 
 
 def main():
