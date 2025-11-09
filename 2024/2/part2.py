@@ -30,25 +30,27 @@ def is_report_safe(report: report_type) -> bool:
     prev_increment: int | None = None
     num_unsafe = 0
     for level in report[1:]:
-        if not is_level_safe(level, prev, prev_increment):
+        if is_level_safe(level, prev, prev_increment):
+            prev_increment = level - prev
+            prev = level
+
+        else:
             # We can handle just one safe level for the report to still be safe
-            # FIXME: problem is that we now always skip the one that was unsafe, but we also have to check if its safe instead when skipping the previous one 
+            # FIXME: problem is that we now always skip the one that was unsafe, but we also have to check if its safe instead when skipping the previous one
             num_unsafe += 1
             if num_unsafe > 1:
                 return False
-
-        else:
-            prev_increment = level - prev
-            prev = level
     return True
 
 
 def calc_num_safe_reports(reports: list[report_type]) -> int:
     num_safe_reports = 0
     for report in reports:
-        if DEBUG: print("\nNEW REPORT=", report)
+        if DEBUG:
+            print("\nNEW REPORT=", report)
         safe = is_report_safe(report)
-        if DEBUG: print('Report was safe?: ', safe)
+        if DEBUG:
+            print("Report was safe?: ", safe)
         num_safe_reports += int(safe)
     return num_safe_reports
 
