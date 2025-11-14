@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import reduce
 
 Rule = tuple[str, str]
 Update = list[str]
@@ -11,15 +12,14 @@ class Input:
     rules: list[Rule]
     updates: list[Update]
 
-
 def debug_print(*args, level: int = 1, **kwargs):
     if level <= DEBUG_LEVEL:
         print(*args, **kwargs)
 
 
-def read_input() -> Input:
+def read_input(filename: str = "input") -> Input:
     input = Input([], [])
-    with open("input", "r") as file:
+    with open(filename, "r") as file:
         section = 1
         for line in file:
             line = line.strip()
@@ -46,7 +46,9 @@ def update_follows_rule(update: Update, rule: Rule) -> bool:
         if num == rule[0]:
             debug_print("First matched!", level=2)
             if second_matched:
-                debug_print("Already had second match, update does NOT follow rule", level=2)
+                debug_print(
+                    "Already had second match, update does NOT follow rule", level=2
+                )
                 return False
             first_matched = True
         elif num == rule[1]:
@@ -57,16 +59,14 @@ def update_follows_rule(update: Update, rule: Rule) -> bool:
             # debug_print(
             #     "Did not have first match, update does NOT follow rule", level=3
             # )
-            debug_print(
-                "Did not have first match already", level=3
-            )
+            debug_print("Did not have first match already", level=3)
             second_matched = True
     # exit(f"Hit fallback after loop in update_follows_rule for {update=} and {rule}...")
     debug_print("Hitting fallback, returning true!", level=3)
     return True
 
 
-def update_follows_rules(update: Update, rules: list[Rule]) -> bool:
+def unfollowed_rules_for_update(update: Update, rules: list[Rule]) -> bool:
     for rule in rules:
         if not update_follows_rule(update, rule):
             return False
@@ -80,7 +80,7 @@ def main():
     middle_sum = 0
     for update in input.updates:
         debug_print(f"Checking {update=}", level=2)
-        if not update_follows_rules(update, input.rules):
+        if not unfollowed_rules_for_update(update, input.rules):
             continue
         debug_print(f"Update {update} follows rules!")
         middle_sum += int(update[int(len(update) / 2)])
