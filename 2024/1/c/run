@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+in="$1"
+out="${in%.*}"
+
+gcc "$in" --output="$out" -Wall -Werror && "./$out" && rm "$out"
