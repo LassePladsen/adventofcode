@@ -31,8 +31,8 @@ Columns read_input_cols(char filename[]) {
   int val1, val2;
 
   // Loop over lines
+  // Split line into columns by whitespace, and add to correct column
   while (fgets(line, MAXLEN, fptr)) {
-    // Split into columns by whitespace, and add to correct column
     split = strtok(line, " ");
     if (split == NULL)
       continue;
