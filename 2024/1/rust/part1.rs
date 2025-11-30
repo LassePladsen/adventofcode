@@ -1,20 +1,6 @@
-use std::fs;
+use input::read_cols;
 
-fn read_cols(filename: &str) -> (Vec<i32>, Vec<i32>) {
-    let input = fs::read_to_string(filename).unwrap();
-    let mut col1: Vec<i32> = Vec::new();
-    let mut col2: Vec<i32> = Vec::new();
-    for line in input.split("\n") {
-        let mut nums = line.split_whitespace();
-        if let Some(n) = nums.next() {
-            col1.push(n.parse().unwrap());
-        }
-        if let Some(n) = nums.next() {
-            col2.push(n.parse().unwrap());
-        }
-    }
-    (col1, col2)
-}
+mod input;
 
 fn get_col_diffs(col1: Vec<i32>, col2: Vec<i32>) -> Vec<u32> {
     col1.iter()
@@ -29,9 +15,5 @@ fn main() {
     col1.sort();
     col2.sort();
 
-    println!("{}", 
-        get_col_diffs(col1, col2)
-        .iter()
-        .sum::<u32>()
-    );
+    println!("{}", get_col_diffs(col1, col2).iter().sum::<u32>());
 }
