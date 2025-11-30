@@ -13,7 +13,7 @@ typedef struct {
   IntArr col2;
 } Columns;
 
-Columns read_cols(char filename[]) {
+Columns read_input_cols(char filename[]) {
   FILE *fptr;
   fptr = fopen(filename, "r");
   if (fptr == NULL) {
@@ -29,7 +29,6 @@ Columns read_cols(char filename[]) {
   int *col1 = malloc(capacity1 * sizeof(int));
   int *col2 = malloc(capacity2 * sizeof(int));
   int val1, val2;
-  // size_t len;
 
   // Loop over lines
   while (fgets(line, MAXLEN, fptr)) {
@@ -41,7 +40,7 @@ Columns read_cols(char filename[]) {
     // Parse as integer
     val1 = atoi(split);
 
-    // Resize if neccesary
+    // Resize if necessary
     if (size1 >= capacity1) {
       capacity1 *= 2;
       col1 = realloc(col1, capacity1 * sizeof(int));
@@ -55,7 +54,7 @@ Columns read_cols(char filename[]) {
     // Parse as integer
     val2 = atoi(split);
 
-    // Resize if neccesary
+    // Resize if necessary
     if (size2 >= capacity2) {
       capacity2 *= 2;
       col2 = realloc(col2, capacity2 * sizeof(int));
@@ -83,15 +82,11 @@ void print_col_vals(IntArr col) {
 }
 
 void free_cols(Columns cols) {
-  // for (size_t i = 0; i < cols.col1.size; i++)
-  //   free(cols.col1.arr[i]);
-  // for (size_t i = 0; i < cols.col2.size; i++)
-  //   free(cols.col2.arr[i]);
   free(cols.col1.arr);
   free(cols.col2.arr);
 }
 
-// Custom comparison function for integers (ascending order)
+/// Custom comparison function for integers (ascending order)
 int cmp_ints(const void *a, const void *b) { return (*(int *)a - *(int *)b); }
 void sort_cols(Columns cols) {
   qsort(cols.col1.arr, cols.col1.size, sizeof(int), cmp_ints);
@@ -108,7 +103,7 @@ int column_diffs(Columns cols) {
 }
 
 int main() {
-  Columns cols = read_cols("../input");
+  Columns cols = read_input_cols("../input");
   printf("Length of columns: %lu\n", cols.col1.size);
 
   // print_col_vals(cols.col1);
