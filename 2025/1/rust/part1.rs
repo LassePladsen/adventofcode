@@ -1,6 +1,8 @@
+use core::panic;
+
 mod input;
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 
 macro_rules! debugprint {
     ($($arg:tt)*) => {
@@ -9,24 +11,13 @@ macro_rules! debugprint {
         }
     };
 }
-fn main() {
-    let input = input::read_input(Some("../input.txt"));
 
-    if DEBUG {
-        println!("Input is:");
-        input.lines().for_each(|x| println!("{x}"));
-        println!();
-    }
-
-    let password = parse_password(&input);
-    println!("The password is {password}");
-}
-
-/// Password is the number of times the dial is poining at zero (after a rotation)
+/// Password is the number of times the dial has pointed at zero after a rotation
 fn parse_password(input: &String) -> usize {
     const START_POS: isize = 50;
     const TARGET_POS: isize = 0;
     const MAX_POS: isize = 99;
+    const MIN_POS: isize = 0;
 
     let mut at_zero_count: usize = 0;
     let mut pos: isize = START_POS;
@@ -46,17 +37,36 @@ fn parse_password(input: &String) -> usize {
 
         pos += pos_diff;
         debugprint!("LP new pos before resolving: {pos:?}");
-        if pos > MAX_POS {
-            pos = pos - (MAX_POS + 1)
-        } else if pos < 0 {
-            pos = MAX_POS + 1 + pos
+
+        // Modulo to resolve within bounds
+        pos = pos % (MAX_POS + 1);
+
+        // Wrap around 99 if negative
+        if pos < MIN_POS {
+            pos = MAX_POS + 1 + pos;
+        }
+        debugprint!("LP final new pos: {pos:?}\n");
+        if pos < MIN_POS || pos > MAX_POS {
+            panic!("Final new pos is outside bounds!");
         }
 
-        debugprint!("LP final new pos: {pos:?}\n");
         if pos == TARGET_POS {
             at_zero_count += 1;
         }
     }
 
     at_zero_count
+}
+
+fn main() {
+    let input = input::read_input("../input.txt");
+
+    if DEBUG {
+        println!("Input is:");
+        input.lines().for_each(|x| println!("{x}"));
+        println!();
+    }
+
+    let password = parse_password(&input);
+    println!("The password is {password}");
 }
