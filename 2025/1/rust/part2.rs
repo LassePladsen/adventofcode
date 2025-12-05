@@ -85,7 +85,7 @@ fn parse_password(input: &String) -> usize {
 }
 
 fn main() {
-    let input = input::read_input("../input.txt");
+    let input = input::read_input();
 
     // if DEBUG {
     //     println!("Input is:");
