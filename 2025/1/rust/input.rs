@@ -11,8 +11,8 @@ fn read_filepath() -> String {
 
 pub fn read_input() -> String {
     let filepath = read_filepath();
-    let input = fs::read_to_string(filepath).expect(&format!(
-        "Could not open file '{file_path}'! Make sure it exists and you have read permissions"
+    let input = fs::read_to_string(&filepath).expect(&format!(
+        "Could not open file '{filepath}'! Make sure it exists and you have read permissions"
     ));
     input
 }
