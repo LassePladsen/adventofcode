@@ -1,3 +1,5 @@
+use std::collections::{HashMap, btree_map::Values};
+
 mod input;
 
 const DEBUG: bool = true;
@@ -13,44 +15,59 @@ macro_rules! debugprint {
 fn main() {
     let id_ranges = input::read_id_ranges();
     debugprint!("LP id_ranges: {id_ranges:?}\n");
-    let mut prev_char: Option<char>;
     let mut invalid_sum: u128 = 0;
-    let mut invalid_id: String;
 
     for range in id_ranges {
-        for id in range.split("-") {
+        let mut range_iter = range.split("-");
+        let start: u128 = range_iter
+            .next()
+            .unwrap()
+            .parse()
+            .expect("Error parsing range to int");
+        let end: u128 = range_iter
+            .next()
+            .unwrap()
+            .parse()
+            .expect("Error parsing range to int");
+
+        // Loop over every id in the range, check for invalids
+        for id in start..end + 1 {
             debugprint!("id is {id}");
 
-            prev_char = None;
-            invalid_id = "".to_string();
-            for cur in id.chars() {
-                if let None = prev_char {
-                    prev_char = Some(cur);
-                    continue;
-                }
-                debugprint!("prev={}, cur={cur}", prev_char.unwrap());
-
-                // Invalid if any digit is repeated
-                if cur == prev_char.unwrap() {
-                    // invalid += cur.to_digit(10).expect("Could not parse char to digit");
-                    debugprint!("We had a duplicate of the char {cur}, pushing it to invalid_id!");
-                    invalid_id = format!("{invalid_id}{}{cur}", prev_char.unwrap());
-                    debugprint!("LP invalid_id: {invalid_id:?}");
-                }
-
-                prev_char = Some(cur);
-            }
-
-            if !invalid_id.is_empty() {
-                debugprint!("For id={id} we got invalid id of {invalid_id:?}, adding to sum");
-                invalid_sum += invalid_id
-                    .parse::<u128>()
-                    .expect("Error parsing '{invalid_id}' to int");
-                debugprint!("LP invalid_sum: {invalid_sum:?}");
+            if is_invalid(id) {
+                debugprint!("Id {id} is invalid! Adding to sum");
+                invalid_sum += id;
+                debugprint!("LP new invalid_sum: {invalid_sum:?}");
             }
             debugprint!();
         }
     }
 
     println!("Total sum of invalid ids: {invalid_sum}");
+}
+
+/// An id is invalid if it consists only of chars that are duplicated exactly once
+/// TODO: needs to check not only one character at a time, but possible substring.
+/// i.e. 123123 is invalid cause its 123 twice
+fn is_invalid(id: u128) -> bool {
+    // Track count of every digit found
+    let mut digit_counts: HashMap<char, usize> = HashMap::new();
+
+    for c in id.to_string().chars() {
+        let count = digit_counts.entry(c).or_insert(0);
+        *count += 1;
+
+        // We know early this is valid if seen more than twice
+        if *count > 2 {
+            return false;
+        }
+        debugprint!("LP digit_counts: {digit_counts:?}");
+    }
+
+    for count in digit_counts.values() {
+        if *count != 2 {
+            return false;
+        }
+    }
+    return true;
 }
