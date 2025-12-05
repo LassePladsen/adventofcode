@@ -21,6 +21,8 @@ fn parse_password(input: &String) -> usize {
 
     let mut at_zero_count: usize = 0;
     let mut pos: isize = START_POS;
+    let mut new_pos: isize;
+    let mut resolved_pos: isize;
     let mut direction: char;
     let mut pos_diff: isize;
     for line in input.lines() {
@@ -35,24 +37,23 @@ fn parse_password(input: &String) -> usize {
 
         debugprint!("LP pos_diff: {:?}", pos_diff);
 
-        pos += pos_diff;
-        debugprint!("LP new pos before resolving: {pos:?}");
+        new_pos = pos + pos_diff;
+        debugprint!("LP new pos before resolving: {new_pos:?}");
 
         // Modulo to resolve within bounds
-        pos = pos % (MAX_POS + 1);
+        // Solve negative by adding a bit number
+        resolved_pos = (new_pos + 10000000) % (MAX_POS + 1);
 
-        // Wrap around 99 if negative
-        if pos < MIN_POS {
-            pos = MAX_POS + 1 + pos;
-        }
-        debugprint!("LP final new pos: {pos:?}\n");
-        if pos < MIN_POS || pos > MAX_POS {
+        debugprint!("LP resolved new pos: {pos:?}\n");
+
+        if resolved_pos < MIN_POS || resolved_pos > MAX_POS {
             panic!("Final new pos is outside bounds!");
         }
 
-        if pos == TARGET_POS {
+        if resolved_pos == TARGET_POS {
             at_zero_count += 1;
         }
+        pos = resolved_pos;
     }
 
     at_zero_count
