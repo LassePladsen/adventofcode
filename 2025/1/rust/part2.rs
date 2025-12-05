@@ -13,74 +13,56 @@ macro_rules! debugprint {
 /// Password is the number of times the dial has rotated at or past zero
 fn parse_password(input: &String) -> usize {
     const START_POS: isize = 50;
+    const TARGET_POS: isize = 0;
     const MAX_POS: isize = 99;
     const MIN_POS: isize = 0;
 
     let mut hit_zero_count: usize = 0;
-    let mut this_turn_hit_zero_count: isize;
+    let mut iter_hit_zero_count: usize;
     let mut pos: isize = START_POS;
     let mut new_pos: isize;
     let mut resolved_pos: isize;
     let mut direction: char;
-    let mut pos_diff: isize;
+    let mut rotate_by: isize;
     for line in input.lines() {
+        iter_hit_zero_count = 0;
         direction = line.chars().nth(0).unwrap();
 
         debugprint!("LP start pos: {pos}");
 
         debugprint!("LP direction: {:?}", direction);
-        pos_diff = line[1..].parse().expect("Could not parse pos_diff");
+        rotate_by = line[1..].parse().expect("Could not parse pos_diff");
 
-        if direction == 'L' {
-            pos_diff *= -1
+        debugprint!("LP rotate_by: {:?}", rotate_by);
+
+        // Do one turn at a time so we can easily use solution from part1
+        for _ in 0..rotate_by.abs() {
+            match direction {
+                'L' => new_pos = pos - 1,
+                'R' => new_pos = pos + 1,
+                d => panic!("Got unknown direction {d}"),
+            }
+
+            // Modulo to resolve within bounds
+            // Solve negative by adding a bit number
+            resolved_pos = (new_pos + 10000000) % (MAX_POS + 1);
+            // debugprint!("LP new_pos: {new_pos:?}");
+
+            if resolved_pos < MIN_POS || resolved_pos > MAX_POS {
+                panic!(
+                    "Final new new_pos is outside bounds with new_pos={new_pos}, min={MIN_POS}, max={MAX_POS}"
+                );
+            }
+
+            if resolved_pos == TARGET_POS {
+                iter_hit_zero_count += 1;
+            }
+            pos = resolved_pos;
         }
-
-        debugprint!("LP pos_diff: {:?}", pos_diff);
-
-        new_pos = pos + pos_diff;
-        debugprint!("LP new pos before resolving: {new_pos:?}");
-
-        // Modulo to resolve within bounds
-        resolved_pos = new_pos % (MAX_POS + 1);
-
-        // Wrap around 99 if negative
-        if resolved_pos < MIN_POS {
-            resolved_pos = MAX_POS + 1 + resolved_pos;
-        }
-        if resolved_pos < MIN_POS || resolved_pos > MAX_POS {
-            panic!(
-                "Final new new_pos is outside bounds with new_pos={new_pos}, min={MIN_POS}, max={MAX_POS}"
-            );
-        }
-        println!("LP resolved_pos: {resolved_pos:?}");
-
-        // Number of times passed zero is the diff between new_pos before and after resolving back inside bounds, divided by 100.
-        // But we need to handle the edge case where we started/landed at exactly zero
-        this_turn_hit_zero_count = (resolved_pos - new_pos).abs() / (MAX_POS + 1);
-        println!(
-            "LP this_turn_hit_zero_count before resolving edge cases at zero: {this_turn_hit_zero_count:?}"
-        );
-
-        // If started at zero exactly, but didnt make it across the entire wheel back to
-        // zero
-        if pos == 0 && pos_diff < (MAX_POS + 1) && this_turn_hit_zero_count >= 1 {
-            this_turn_hit_zero_count -= 1;
-        }
-        // If landed at zero exactly
-        if resolved_pos == 0 && this_turn_hit_zero_count == 0 {
-            this_turn_hit_zero_count += 1;
-        }
-
-        if this_turn_hit_zero_count < 0 {
-            panic!("This_turn_hit_zero_count can't be negative! got {this_turn_hit_zero_count}");
-        }
-
-        debugprint!("LP this_turn_hit_zero_count: {this_turn_hit_zero_count:?}\n");
-
-        hit_zero_count += this_turn_hit_zero_count as usize;
-        pos = resolved_pos;
+        debugprint!("Hit zero {iter_hit_zero_count} times");
+        debugprint!("New resolved pos after loop turning: {pos}\n");
+        hit_zero_count += iter_hit_zero_count;
     }
-
     hit_zero_count
 }
 
