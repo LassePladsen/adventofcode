@@ -35,7 +35,6 @@ fn main() {
         // Loop over every id in the range, check for invalids
         for id in start..end + 1 {
             debugprint!("id is {id}");
-
             if !valid(id) {
                 debugprint!("Id {id} is invalid! Adding to sum");
                 invalid_sum += id;
@@ -49,6 +48,10 @@ fn main() {
 }
 
 /// An id is invalid if it only consists of some sequence of digits repeated exactly once (i.e. shows up twice)
+/// FIXME: this now only checks for one pattern, specifically the pattern found after hitting
+/// the first nonduplicate character. It instead needs to check every possible pattern size. e.g.
+/// for 38593859 it first needs to check if 38 is a repeated pattern, then 385, then 3859 and here
+/// it should find that its invalid!
 fn valid(id: u128) -> bool {
     const MAX_REPEAT_COUNT: usize = 2;
     let s = id.to_string();
@@ -75,12 +78,6 @@ fn valid(id: u128) -> bool {
 
         prev = c;
     }
-
-    // THIS IS NOT TRUE, e.g. 11 would be an invalid, but it all has the same chars
-    // If string consists of all same characters, then we know its valid immidietly
-    // if strlen.is_none() {
-    //     return true;
-    // }
 
     // Specially handle where the strlen wasn't found OR its equal to the string length: this is like "11", "13". 11 is invalid, but 13 is valid.
     if strlen.is_none() || strlen.unwrap() == s.len() {
@@ -113,9 +110,9 @@ fn valid(id: u128) -> bool {
         debugprint!("LP split1: {split1:?}");
         debugprint!("LP split2: {split2:?}");
     }
-    // We know its valid immidietely if its not equal to the pattern, i.e not a repeat!
-    if split1 != pattern {
-        debugprint!("Hello this is not the pattern!");
+    // Check once more after loop
+    if split1 != pattern || (!split2.is_empty() && split2 != pattern) {
+        debugprint!("Hello this is not the pattern after the loop, so its valid");
         return true;
     }
 
