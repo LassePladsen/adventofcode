@@ -50,7 +50,7 @@ fn main() {
 
 /// An id is invalid if it only consists of some sequence of digits repeated exactly once (i.e. shows up twice)
 fn valid(id: u128) -> bool {
-    const MAX_COUNT: usize = 2;
+    const MAX_REPEAT_COUNT: usize = 2;
     let s = id.to_string();
 
     if s.is_empty() {
@@ -90,46 +90,34 @@ fn valid(id: u128) -> bool {
 
     let strlen = strlen.unwrap();
     debugprint!("LP strlen: {strlen:?}");
+    let pattern = &s[..strlen];
+    debugprint!("LP pattern: {pattern:?}");
+    let mut repeat_count: usize = 1; // start at one because the first one will not be counted
 
-    let mut char_counts = HashMap::<char, usize>::new();
-
-    // Returns false if a count got too big, meaning the id is valid early!
-    fn increment_char_count(char_counts: &mut HashMap<char, usize>, char: char) -> bool {
-        let count = char_counts.entry(char).or_insert(0);
-        *count += 1;
-        if *count > MAX_COUNT {
-            debugprint!("Saw too big count {count} for char {char}! Its valid early");
-            return false;
-        }
-        return true;
-    };
-
-    // Continually split string at the found strlen, then count characters into the map
+    // Continually split string at the found strlen, then compare with found pattern
     let (mut split1, mut split2) = s.split_at(strlen);
     debugprint!("LP before loop split1: {split1:?}");
     debugprint!("LP before loop split2: {split2:?}");
     while split2.len() >= strlen {
-        for char in split1.chars() {
-            if !increment_char_count(&mut char_counts, char) {
-                return true;
-            }
+        if split1 != pattern {
+            debugprint!("Hello this is not the pattern, so its valid");
+            return true;
+        }
+        repeat_count += 1;
+        if repeat_count > MAX_REPEAT_COUNT {
+            debugprint!("Repeat count {repeat_count} got too big! its valid");
+            return true;
         }
 
         (split1, split2) = split2.split_at(strlen);
         debugprint!("LP split1: {split1:?}");
         debugprint!("LP split2: {split2:?}");
     }
-    // Do one more increment for the last split1, split2
-    for char in split1.chars() {
-        if !increment_char_count(&mut char_counts, char) {
-            return true;
-        }
+    // We know its valid immidietely if its not equal to the pattern, i.e not a repeat!
+    if split1 != pattern {
+        debugprint!("Hello this is not the pattern!");
+        return true;
     }
-    if !split2.is_empty() {
-        panic!("Split2 was not empty after loop!: {split2:?}");
-    }
-
-    debugprint!("LP char_counts: {char_counts:?}");
 
     return false;
 }
