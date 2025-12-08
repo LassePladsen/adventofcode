@@ -3,8 +3,6 @@ name = "rust"
 version = "0.1.0"
 edition = "2024"
 
-[dependencies]
-
 [[bin]]
 name = "part1"
 path = "part1.rs"
@@ -12,3 +10,6 @@ path = "part1.rs"
 [[bin]]
 name = "part2"
 path = "part2.rs"
+
+[dependencies]
+fancy-regex = "0.16.2"
